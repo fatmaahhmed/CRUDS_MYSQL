@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:latest
+    container_name: mysql-container
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: "supersecretpassword"
+      MYSQL_DATABASE: "mydatabase"
+      MYSQL_USER: "myuser"
+      MYSQL_PASSWORD: "mypassword"
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:
+    driver: local
+
+# repl mode for this container 
+# docker run -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=supersecretpassword -e MYSQL_DATABASE=mydatabase -e MYSQL_USER=myuser -e MYSQL_PASSWORD=<PASSWORD> -e MYSQL_ALLOW_EMPTY_
