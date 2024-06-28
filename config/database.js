@@ -13,5 +13,4 @@ const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, proces
   dialect: 'mysql',
   port: process.env.DB_PORT,
 });
-
 module.exports = sequelize;
