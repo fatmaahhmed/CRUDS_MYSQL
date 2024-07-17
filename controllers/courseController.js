@@ -1,42 +1,94 @@
-const Course = require('../models/courses'); // تأكد من تعديل المسار حسب الحاجة
-const asyncHandler = require('../middleware/errorHandler'); // تأكد من تعديل المسار حسب الحاجة
+const { Course } = require('../models');
+const asyncHandler = require('../middleware/errorHandler');   
+const HttpStatus = require('../utils/httpStatus.js');
+
+
 
 const getAllCourses = asyncHandler(async (req, res) => {
-  const courses = await Course.findAll();
-  res.json({ status: 'success', data: { courses } });
-});
 
+  //http://127.0.0.1:3030/api/courses?page=1&limit=5
+
+  console.log('getAllCourses');
+  const page = req.query.page || 1;
+  const pageSize = req.query.limit || 5;
+  const offset = (page - 1) * pageSize;
+  const limit = parseInt(pageSize);
+
+  const { count, rows: courses } = await Course.findAndCountAll({
+    offset,
+    limit,
+  });
+
+
+  res.status(HttpStatus.OK).json({
+    status: 'success',
+    message: 'Courses fetched successfully',
+    data: {
+      courses,
+    },
+  });
+});
 const getCourseById = asyncHandler(async (req, res) => {
   const course = await Course.findByPk(req.params.id);
   if (course) {
-    res.json({ status: 'success', data: { course } });
+    res.status(HttpStatus.OK).json({
+      status: 'success',
+      message: 'Course fetched successfully',
+      data: course,
+    });
   } else {
-    res.status(404).json({ status: 'fail', message: 'Course not found' });
+    res.status(HttpStatus.NOT_FOUND).json({
+      status: 'fail',
+      message: 'Course not found',
+      data: null,
+    });
   }
 });
-
 const addCourse = asyncHandler(async (req, res) => {
+  console.log('addCourse');
+  console.log(req.body)
   const newCourse = await Course.create(req.body);
-  res.status(201).json({ status: 'success', data: { newCourse } });
+
+  console.log(newCourse)
+  res.status(HttpStatus.CREATED).json({
+    status: 'success',
+    message: 'Course added successfully',
+    data: newCourse,
+  });
 });
 
 const updateCourse = asyncHandler(async (req, res) => {
   const course = await Course.findByPk(req.params.id);
   if (course) {
     await course.update(req.body);
-    res.json({ status: 'success', data: { course } });
+    res.status(HttpStatus.OK).json({
+      status: 'success',
+      message: 'Course updated successfully',
+      data: course,
+    });
   } else {
-    res.status(404).json({ status: 'fail', message: 'Course not found' });
+    res.status(HttpStatus.NOT_FOUND).json({
+      status: 'fail',
+      message: 'Course not found',
+      data: null,
+    });
   }
 });
-
 const deleteCourse = asyncHandler(async (req, res) => {
   const course = await Course.findByPk(req.params.id);
   if (course) {
     await course.destroy();
-    res.json({ status: 'success', message: 'Course deleted' });
+    res.status(HttpStatus.NO_CONTENT).json({
+      status: 'success',
+      message: 'Course deleted successfully',
+      data: null,
+    });
   } else {
-    res.status(404).json({ status: 'fail', message: 'Course not found' });
+    res.status(HttpStatus.NOT_FOUND).json({
+      status: 'fail',
+      message: 'Course not found',
+      data: null,
+    });
   }
 });
 
@@ -45,5 +97,6 @@ module.exports = {
   getCourseById,
   addCourse,
   updateCourse,
-  deleteCourse
+  deleteCourse,
 };
+//Cruds operations 

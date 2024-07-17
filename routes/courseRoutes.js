@@ -1,11 +1,24 @@
 const express = require('express');
-const router = express.Router();
-const courseController = require('../controllers/courseController');
+// const validation = require('../validation/validation');
+const coursesController = require('../controllers/courseController.js');
+const courseRouter = express.Router();
 
-router.get('/courses', courseController.getAllCourses);
-router.get('/courses/:id', courseController.getCourseById);
-router.post('/courses', courseController.addCourse);
-router.put('/courses/:id', courseController.updateCourse);
-router.delete('/courses/:id', courseController.deleteCourse);
+// Middleware to extract ID from URL parameters and set it in the request body
+function extractIdFromURL(req, res, next) {
+    const id = req.params.id;
+    req.body.id = id;
+    next();
+}
 
-module.exports = router;
+courseRouter.route('/')
+    .get(coursesController.getAllCourses)
+    .post(coursesController.addCourse);
+    // .delete(coursesController.removeCourse);
+
+courseRouter.route('/:id')
+    .get(coursesController.getCourseById)
+    .patch( coursesController.updateCourse)
+    .delete(coursesController.deleteCourse);
+
+// Export the router
+module.exports = courseRouter;

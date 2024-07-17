@@ -1,27 +1,34 @@
-const { DataTypes } = require('sequelize');
+const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
+const User = require('./User');
 
 const Course = sequelize.define('Course', {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
-    primaryKey: true,
+    primaryKey: true
   },
-  name: {
+  courseName: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: false
   },
-  price: {
-    type: DataTypes.STRING,
-    allowNull: false,
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true
   },
-  duration: {
-    type: DataTypes.STRING,
-    allowNull: false,
+  instructorId: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: User,
+      key: 'id'
+    }
   },
+  createdAt: {
+    type: DataTypes.DATE,
+    defaultValue: Sequelize.NOW
+  }
 }, {
-  tableName: 'courses',
-  timestamps: false, // Disable `createdAt` and `updatedAt` fields
+  timestamps: false
 });
 
 module.exports = Course;

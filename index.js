@@ -2,18 +2,28 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const sequelize = require('./config/database');
 const courseRoutes = require('./routes/courseRoutes');
-
+const userRoutes = require('./routes/courseRoutes');
+const cors= require ('cors')
 const app = express();
 const PORT = process.env.PORT || 3030;
-
+const SERVER = 'localhost';
 app.use(bodyParser.json());
+app.use(cors())
 
-app.use('/api', courseRoutes);
+app.use('/api/users',userRoutes);
+app.use('/api/courses', courseRoutes);/*  */
+app.all('*',(req,res,next)=>{
+  res.status(404).json({
+    status: 'fail',
+    message: 'Route not found',
+    data: null,
+  });
+})
 
 
 sequelize.sync()
   .then(() => {
-    app.listen(PORT, () => {
+    app.listen(PORT, SERVER, () => {
       console.log(`Server is running on port ${PORT}`);
     });
   })
