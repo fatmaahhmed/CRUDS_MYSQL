@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const sequelize = require('./config/database');
 const courseRoutes = require('./routes/courseRoutes');
 const userRoutes = require('./routes/courseRoutes');
+require('./associations');
 const cors= require ('cors')
 const app = express();
 const PORT = process.env.PORT || 3030;
