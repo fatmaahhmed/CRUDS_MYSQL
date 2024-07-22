@@ -1,16 +1,24 @@
+const sequelize = require('./config/database');
+const Student = require('./models/student');
+const Course = require('./models/course');
+const Enrollment = require('./models/Enrollment');
 const express = require('express');
 const bodyParser = require('body-parser');
-const sequelize = require('./config/database');
 const courseRoutes = require('./routes/courseRoutes');
 const userRoutes = require('./routes/courseRoutes');
-require('./associations');
+
 const cors= require ('cors')
 const app = express();
 const PORT = process.env.PORT || 3030;
 const SERVER = 'localhost';
 app.use(bodyParser.json());
 app.use(cors())
+app.get('/', function(req, res){
+  console.log('helo')
+  res.send('Hello World!')
 
+
+})
 app.use('/api/users',userRoutes);
 app.use('/api/courses', courseRoutes);/*  */
 app.all('*',(req,res,next)=>{

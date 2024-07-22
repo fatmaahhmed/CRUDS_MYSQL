@@ -1,33 +1,30 @@
-const { Course } = require('../models');
-const asyncHandler = require('../middleware/errorHandler');   
-const HttpStatus = require('../utils/httpStatus.js');
+const { Course } = require('../models/course');
+const asyncHandler = require('../middleware/errorHandler');
+const HttpStatus = require('../utils/httpStatus');
 
-
-
+// Get all courses
 const getAllCourses = asyncHandler(async (req, res) => {
-
-  //http://127.0.0.1:3030/api/courses?page=1&limit=5
-
-  console.log('getAllCourses');
   const page = req.query.page || 1;
   const pageSize = req.query.limit || 5;
   const offset = (page - 1) * pageSize;
   const limit = parseInt(pageSize);
-
   const { count, rows: courses } = await Course.findAndCountAll({
     offset,
     limit,
   });
-
-
   res.status(HttpStatus.OK).json({
     status: 'success',
     message: 'Courses fetched successfully',
     data: {
       courses,
+      count,
+      totalPages: Math.ceil(count / limit),
+      currentPage: page
     },
   });
 });
+
+// Get course by ID
 const getCourseById = asyncHandler(async (req, res) => {
   const course = await Course.findByPk(req.params.id);
   if (course) {
@@ -44,12 +41,10 @@ const getCourseById = asyncHandler(async (req, res) => {
     });
   }
 });
-const addCourse = asyncHandler(async (req, res) => {
-  console.log('addCourse');
-  console.log(req.body)
-  const newCourse = await Course.create(req.body);
 
-  console.log(newCourse)
+// Create a new course
+const addCourse = asyncHandler(async (req, res) => {
+  const newCourse = await Course.create(req.body);
   res.status(HttpStatus.CREATED).json({
     status: 'success',
     message: 'Course added successfully',
@@ -57,6 +52,7 @@ const addCourse = asyncHandler(async (req, res) => {
   });
 });
 
+// Update a course
 const updateCourse = asyncHandler(async (req, res) => {
   const course = await Course.findByPk(req.params.id);
   if (course) {
@@ -74,6 +70,8 @@ const updateCourse = asyncHandler(async (req, res) => {
     });
   }
 });
+
+// Delete a course
 const deleteCourse = asyncHandler(async (req, res) => {
   const course = await Course.findByPk(req.params.id);
   if (course) {
@@ -99,4 +97,3 @@ module.exports = {
   updateCourse,
   deleteCourse,
 };
-//Cruds operations 

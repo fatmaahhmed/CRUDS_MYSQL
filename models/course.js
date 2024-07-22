@@ -1,24 +1,32 @@
-// models/user.js
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/database'); // Adjust the path to your database configuration
 
-const User = sequelize.define('User', {
-  username: {
-    type: DataTypes.STRING,
-    allowNull: false
+class Course extends Model {}
+
+Course.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
   },
-  password: {
+  courseName: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
   },
-  email: {
+  courseCode: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
+    unique: true,
   },
-  role: {
-    type: DataTypes.ENUM('student', 'instructor', 'admin'),
-    allowNull: false
-  }
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+}, {
+  sequelize,
+  modelName: 'Course',
+  tableName: 'courses',
+  timestamps: true,
 });
 
-module.exports = User;
+module.exports = Course;

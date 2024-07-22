@@ -1,33 +1,31 @@
 // controllers/userController.js
-
-const User = require('../models/user');
+const asyncHandler = require('express-async-handler');
+// const User = require('../models/user.js');
 const asyncHandler = require('../middleware/errorHandler');
 const { getPagination, getPagingData } = require('../utils/pagination');
 
 //m7taga a3ml validation 3la goz2 ql registrations da 
-const register =  asyncHandler(async(req,res)=>{
+const signup =  asyncHandler(async(req,res)=>{
+  console.log('signup successful');
+  console.log('req.body: '+req.body);
   const user = await User.create(req.body);
   res.status(201).json({
     status:'success',
     data: user,
   });
 })
-//hashing function  to hash password which is saved in db
-//login function
-//JWT function
-
-
 
 const getAllUsers = asyncHandler(async (req, res) => {
-  const { page = 1, pageSize = 5 } = req.query;
-  const { limit, offset } = getPagination(page, pageSize);
+  console.log('getAllUsers');
+  // const { page = 1, pageSize = 5 } = req.query;
+  // const { limit, offset } = getPagination(page, pageSize);
 
-  const data = await User.findAndCountAll({ limit, offset });
-  const response = getPagingData(data, page, limit);
-  res.json({
-    status: 'success',
-    data: response,
-  });
+  // const data = await User.findAndCountAll({ limit, offset });
+  // const response = getPagingData(data, page, limit);
+  // res.json({
+  //   status: 'success',
+  //   data: response,
+  // });
 });
 
 const getUserById = asyncHandler(async (req, res) => {
@@ -86,6 +84,7 @@ const deleteUser = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
+  signup,
   getAllUsers,
   getUserById,
   addUser,

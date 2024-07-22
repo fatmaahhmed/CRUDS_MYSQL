@@ -1,31 +1,40 @@
-// models/enrollment.js
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
-const User = require('./user');
-const Course = require('./course');
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/database'); // Adjust the path to your database configuration
+const Student = require('./student'); // Adjust the path if necessary
+const Course = require('./course'); // Adjust the path if necessary
 
-const Enrollment = sequelize.define('Enrollment', {
+class Enrollment extends Model {}
+
+Enrollment.init({
   studentId: {
     type: DataTypes.INTEGER,
     references: {
-      model: User,
-      key: 'id'
-    }
+      model: Student,
+      key: 'id',
+    },
+    primaryKey: true,
   },
   courseId: {
     type: DataTypes.INTEGER,
     references: {
       model: Course,
-      key: 'id'
-    }
+      key: 'id',
+    },
+    primaryKey: true,
   },
-  status: {
-    type: DataTypes.ENUM('enrolled', 'completed', 'dropped'),
-    allowNull: false
+  enrollmentDate: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
   },
-  grade: {
-    type: DataTypes.STRING(2),
-  }
+}, {
+  sequelize,
+  modelName: 'Enrollment',
+  tableName: 'enrollments',
+  timestamps: true,
 });
+
+Student.belongsToMany(Course, { through: Enrollment, foreignKey: 'studentId' });
+Course.belongsToMany(Student, { through: Enrollment, foreignKey: 'courseId' });
 
 module.exports = Enrollment;
