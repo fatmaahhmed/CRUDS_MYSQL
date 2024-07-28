@@ -29,34 +29,37 @@ const generateToken = (user) => {
   );
 };
 
-const uploadProfilePicture =asyncHandler(
-  async (req, res) => {
-    console.log('upload profile picture');
-    const studentId = parseInt(req.body.id);
-    console.log('upload profile picture', studentId);
-    const file = req.file;
-    console.log('file----------->', file);
-    if (!file) {
-      return res.status(400).json({ error: 'No file uploaded' });
-    }
-    console.log('upload profile picture successful');
-    // You may want to save the file path or URL in the database
-    const profilePictureUrl = `/${file.path}`;
-    // Update student record with the profile picture URL
-    await Student.update(
-      { profilePicture: profilePictureUrl },
-      { where: { id: studentId } }
-    );
-    console.log('----------------------------------------------------');
-    return res.status(200).json({
-      status:'success',
-      message: 'Profile picture uploaded successfully',
-    });
-})
+const uploadProfilePicture = asyncHandler(async (req, res) => {
+  console.log('upload profile picture');
+  const studentId = parseInt(req.body.id);
+  console.log('upload profile picture', studentId);
+  const file = req.file;
+  console.log('file----------->', file);
+  if (!file) {
+    console.log('No file uploaded');
+    return; // Do not send a response here
+  }
+  console.log('upload profile picture successful');
+  const profilePictureUrl = `/${file.path}`;
+  await Student.update(
+    { profilePicture: profilePictureUrl },
+    { where: { id: studentId } }
+  );
+  console.log('----------------------------------------------------');
+  console.log('Profile picture uploaded successfully');
+  res.status(HttpStatus.OK).json({
+    status:'success',
+    message: 'Profile picture uploaded successfully',
+    data: { profilePicture: profilePictureUrl },
+  });
+});
 
 const signup = asyncHandler(async (req, res) => {
   try {
-    // Validate input
+    console.log('Received signup request');
+    console.log('req.body:', req.body);
+    console.log('req.file:', req.file);
+
     const { email, password } = req.body;
     if (!email || !password) {
       return res.status(400).json({
@@ -64,7 +67,7 @@ const signup = asyncHandler(async (req, res) => {
         message: 'Email and password are required',
       });
     }
-    // Check if student with the given email already exists
+
     let student = await Student.findOne({ where: { email } });
     if (student) {
       console.log('Email already exists');
@@ -74,12 +77,12 @@ const signup = asyncHandler(async (req, res) => {
       });
     }
     console.log('Creating a new student record');
-    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
-    // Create a new student record
+    console.log('photo name: ', req.file.originalname);
     student = await Student.create({
       ...req.body,
       password: hashedPassword,
+      profilePicture: req.file? `/${req.file.originalname}` : null,
     });
     console.log('student created');
     const token = generateToken(student);
@@ -90,11 +93,15 @@ const signup = asyncHandler(async (req, res) => {
       status: 'success',
       data: student,
     });
-    req.body.id = student.id; 
-    console.log('req.body.id--->',req.body.id); 
-    console.log('req.file',req.file);
+
+    // Set the student ID in the request body for the next middleware
+    req.body.id = student.id;
+    console.log('req.body.id--->', req.body.id);
+    console.log('req.file', req.file);
+
+    // Call uploadProfilePicture separately
     await uploadProfilePicture(req, res);
-    
+
   } catch (error) {
     console.error('Error during signup:', error);
     res.status(500).json({
