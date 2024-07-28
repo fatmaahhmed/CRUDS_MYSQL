@@ -39,6 +39,16 @@ Student.init({
     allowNull: false,
     defaultValue: DataTypes.NOW,
   },
+  token: {
+    type: DataTypes.STRING, // Adjust type if needed
+    allowNull: true, // Change to false if token is required
+  },
+  profilePicture: { // Add this new field
+    type: DataTypes.STRING,
+    allowNull: true, // Allow null if profile picture is optional
+    defaultValue: 'uploads/profile.png'
+  },
+
 }, {
   sequelize,
   modelName: 'Student',

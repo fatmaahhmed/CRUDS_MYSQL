@@ -1,7 +1,7 @@
-const { Course } = require('../models/course');
+const Course  = require('../models/course');
 const asyncHandler = require('../middleware/errorHandler');
 const HttpStatus = require('../utils/httpStatus');
-
+const jwt=require('jsonwebtoken');
 // Get all courses
 const getAllCourses = asyncHandler(async (req, res) => {
   const page = req.query.page || 1;
@@ -10,7 +10,7 @@ const getAllCourses = asyncHandler(async (req, res) => {
   const limit = parseInt(pageSize);
   const { count, rows: courses } = await Course.findAndCountAll({
     offset,
-    limit,
+    limit, 
   });
   res.status(HttpStatus.OK).json({
     status: 'success',
@@ -23,11 +23,10 @@ const getAllCourses = asyncHandler(async (req, res) => {
     },
   });
 });
-
 // Get course by ID
 const getCourseById = asyncHandler(async (req, res) => {
   const course = await Course.findByPk(req.params.id);
-  if (course) {
+if (course) {
     res.status(HttpStatus.OK).json({
       status: 'success',
       message: 'Course fetched successfully',
@@ -41,19 +40,26 @@ const getCourseById = asyncHandler(async (req, res) => {
     });
   }
 });
-
 // Create a new course
 const addCourse = asyncHandler(async (req, res) => {
-  const newCourse = await Course.create(req.body);
-  res.status(HttpStatus.CREATED).json({
-    status: 'success',
-    message: 'Course added successfully',
-    data: newCourse,
-  });
-});
+  console.log('Add Course Success')
 
+  
+    if (Array.isArray(req.body)) {
+      courses = await Course.bulkCreate(req.body);
+    } else {
+      // If it's a single object, create one course
+      courses = await Course.create(req.body);
+    }
+    res.status(HttpStatus.CREATED).json({
+      status: 'success',
+      message: 'Course(s) added successfully',
+      data: courses,
+    });
+  }
+);
 // Update a course
-const updateCourse = asyncHandler(async (req, res) => {
+  const updateCourse = asyncHandler(async (req, res) => {
   const course = await Course.findByPk(req.params.id);
   if (course) {
     await course.update(req.body);
@@ -69,13 +75,13 @@ const updateCourse = asyncHandler(async (req, res) => {
       data: null,
     });
   }
-});
-
+  });
 // Delete a course
 const deleteCourse = asyncHandler(async (req, res) => {
   const course = await Course.findByPk(req.params.id);
   if (course) {
     await course.destroy();
+    console.log('course destroyed');
     res.status(HttpStatus.NO_CONTENT).json({
       status: 'success',
       message: 'Course deleted successfully',
