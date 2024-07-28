@@ -3,9 +3,18 @@ const express = require('express');
 const verifyToken = require('../middleware/verifyToken');
 const userRouter = express.Router();
 const multer = require('multer');
-const upload = multer({ dest: 'uploads/' });
+// Configure multer
+// Set up multer storage engine
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, 'uploads/'); // Specify the directory where files will be stored
+    },
+    filename: function (req, file, cb) {
+      cb(null, Date.now() + path.extname(file.originalname)); // Rename file
+    }
+  });
+const upload = multer({ storage: storage });
 
-const uplobad = multer({dest:'uploads/'})
 const {
   signup,
   signin,

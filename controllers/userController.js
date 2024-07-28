@@ -29,43 +29,33 @@ const generateToken = (user) => {
   );
 };
 
-// Configure multer
-const upload = multer({
-  storage: multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, path.join(__dirname, 'uploads')); // Absolute path to 'uploads' directory
-    },
-    filename: (req, file, cb) => {
-      cb(null, Date.now() + path.extname(file.originalname)); // Append timestamp to filename
-    },
-  }),
-  limits: { fileSize: 5 * 1024 * 1024 }, // Limit file size to 5MB
-});
+const uploadProfilePicture =asyncHandler(
+  async (req, res) => {
+    console.log('upload profile picture');
+    const studentId = parseInt(req.body.id);
+    console.log('upload profile picture', studentId);
+    const file = req.file;
+    console.log('file----------->', file);
+    if (!file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+    console.log('upload profile picture successful');
+    // You may want to save the file path or URL in the database
+    const profilePictureUrl = `/${file.path}`;
+    // Update student record with the profile picture URL
+    await Student.update(
+      { profilePicture: profilePictureUrl },
+      { where: { id: studentId } }
+    );
+    console.log('----------------------------------------------------');
+    return res.status(200).json({
+      status:'success',
+      message: 'Profile picture uploaded successfully',
+    });
+})
 
-const uploadProfilePicture=asyncHandler(async (req, res) => { 
-  console.log('upload profile picture');
-  
-  const studentId = parseInt(req.body.id);
-  console.log('upload profile picture',studentId);
-  const file = req.file;
-  console.log('file----------->',file);
-  if (!file) {
-    return res.status(400).json({ error: 'No file uploaded' });
-  }
-  console.log('upload profile picture successful');
-  // You may want to save the file path or URL in the database
-  const profilePictureUrl = `/${file.path}`;
-  // Update student record with the profile picture URL
-
-  await Student.update(
-    { profilePicture: profilePictureUrl },
-    { where: { id: studentId } }
-  );
-  console.log('----------------------------------------------------');
-});
 const signup = asyncHandler(async (req, res) => {
   try {
-
     // Validate input
     const { email, password } = req.body;
     if (!email || !password) {
@@ -77,37 +67,33 @@ const signup = asyncHandler(async (req, res) => {
     // Check if student with the given email already exists
     let student = await Student.findOne({ where: { email } });
     if (student) {
-      console.log('Email already exists')
+      console.log('Email already exists');
       return res.status(400).json({
         status: 'fail',
         message: 'Email already exists',
       });
     }
-
     console.log('Creating a new student record');
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
-
     // Create a new student record
     student = await Student.create({
       ...req.body,
       password: hashedPassword,
     });
     console.log('student created');
-    // Generate JWT token using the utility function
     const token = generateToken(student);
     console.log('jwt: ', token);
-    // Update student record with token
     student.token = token;
-    await student.save();
     console.log('student saved');
-    // Send success response
     res.status(201).json({
       status: 'success',
       data: student,
     });
-    id= student.id;
-    uploadProfilePicture(req,res);
+    req.body.id = student.id; 
+    console.log('req.body.id--->',req.body.id); 
+    console.log('req.file',req.file);
+    await uploadProfilePicture(req, res);
     
   } catch (error) {
     console.error('Error during signup:', error);
@@ -117,7 +103,6 @@ const signup = asyncHandler(async (req, res) => {
     });
   }
 });
-
 
 const signin = asyncHandler(async (req, res) => {
   console.log('signin successful');
@@ -242,7 +227,6 @@ const deleteStudent = asyncHandler(async (req, res) => {
 module.exports = {
   signup,
   signin,
-
   uploadProfilePicture,
   getAllStudents,
   getStudentById,
